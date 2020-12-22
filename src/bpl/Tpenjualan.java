@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import java.awt.Color;
 import javax.swing.SwingConstants;
@@ -18,6 +19,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JTable;
 
 import java.sql.*;
+import java.time.LocalDate;
 
 import com.toedter.calendar.JDateChooser;
 
@@ -48,6 +50,12 @@ public class Tpenjualan extends JFrame {
 	private JTextField textField_9;
 	private JTextField textField_10;
 	private JTextField textField_11;
+	private String no_resi;
+	private String no_sku;
+	private String nama;
+	private String hjual;
+	private String qty;
+	private String harga;
 
 	/**
 	 * Launch the application.
@@ -64,6 +72,76 @@ public class Tpenjualan extends JFrame {
 			}
 		});
 	}
+	public void Batal(){
+	    int x, y, z;
+	    x = Integer.parseInt(textField_11.getText());
+	    y = Integer.parseInt(textField_5.getText());
+	    z = x+y;
+	    
+	    String Barang_ID=textField_2.getText();
+	     try{
+	       Connection c= conn = DriverManager.getConnection(url, user, password);  
+	       String sql ="UPDATE barang SET stock=? WHERE Sku=?";  
+	       PreparedStatement p=(PreparedStatement)c.prepareStatement(sql);  
+	           p.setInt(1,z);
+	           p.setString(2,Barang_ID);//yang kode atau id letakkan di nomor terakhir  
+	           p.executeUpdate();  
+	           p.close();  
+	     }catch(SQLException e){  
+	       System.out.println("Terjadi Kesalahan");  
+	     }finally{   
+	       //JOptionPane.showMessageDialog(this,"Stock barang telah di update Diubah");  
+	     }
+	     
+	     try {
+	        Connection c= conn = DriverManager.getConnection(url, user, password);
+	        String sql="DELETE From transaksi_detail WHERE No_resi='"+textField.getText()+"'";
+	        PreparedStatement p=(PreparedStatement)c.prepareStatement(sql);
+	        p.executeUpdate();
+	        p.close();
+	    }catch(SQLException e){
+	        System.out.println("Terjadi Kesalahan");
+	    }finally{
+	        loadData();
+	        JOptionPane.showMessageDialog(this,"Sukses Hapus Data...");
+	    }  
+	   }
+	
+	public final void loadData(){
+		   model.getDataVector().removeAllElements();
+		   model.fireTableDataChanged();
+		   try{  
+		     Connection c= conn = DriverManager.getConnection(url, user, password);
+		       Statement s= c.createStatement();
+		     String sql="SELECT * FROM transaksi_detail"; 
+		       ResultSet r=s.executeQuery(sql);
+		     while(r.next()){
+		       Object[]o=new Object[5];
+		       o[0]=r.getString("ID");
+		       o[1]=r.getString("Sku");
+		       o[2]=r.getString("No_resi");
+		       o[3]=r.getString("Jumlah");
+		       o[4]=r.getString("Harga");
+		       o[5]=r.getString("Stock");
+		       model.addRow(o);
+		     }  
+		     r.close();  
+		     s.close();  
+		     //ShowData();  
+		   }catch(SQLException e){  
+		     System.out.println("Terjadi Kesalahan");  
+		   }
+
+
+
+		   //menjumlahkan isi colom ke 4 dalam tabel
+		   int total = 0;
+		   for (int i =0; i< table.getRowCount(); i++){
+		       int amount = Integer.parseInt((String)table.getValueAt(i, 4));
+		       total += amount;
+		   }
+		   textField_8.setText(""+total);
+		 }
 
 	/**
 	 * Create the frame.
@@ -227,6 +305,35 @@ public class Tpenjualan extends JFrame {
 		JButton TButton = new JButton("Tambah");
 		TButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				Integer id = 0;
+				no_sku = textField_2.getText();
+				no_resi = textField.getText();
+				nama = textField_3.getText();
+				hjual = textField_4.getText();
+				qty = textField_5.getText();
+				harga = textField_8.getText();
+				
+				if(id.equals("") || no_sku.equals("") || nama.equals("") || hjual.equals("") || qty.equals("") || harga.equals("")) {
+					JOptionPane.showMessageDialog(null, "Error!");
+				}else {
+				try {
+					conn = DriverManager.getConnection(url, user, password);
+					stmt = conn.createStatement();
+					String sql = "INSERT INTO transaksi_detail VALUES ('"+id+"','"+no_sku+"','"+no_resi+"','"+qty+"','"+harga+"',)";
+					
+					JOptionPane.showMessageDialog(null, "Transaksi berhasil");
+					
+					int a = stmt.executeUpdate(sql);
+					if(a>0) {
+						textField.setEnabled(true);
+						dateChooser.setEnabled(true);
+						textField_1.setEnabled(true);
+					}
+					
+				}catch(Exception a) {
+					a.printStackTrace();
+					}
+				}	
 			}
 		});
 		TButton.setBounds(12, 160, 89, 23);
@@ -235,6 +342,7 @@ public class Tpenjualan extends JFrame {
 		JButton HButton = new JButton("Hapus");
 		HButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				Batal();
 			}
 		});
 		HButton.setBounds(108, 160, 89, 23);
@@ -249,6 +357,39 @@ public class Tpenjualan extends JFrame {
 		lblNewLabel_9.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblNewLabel_9.setBounds(204, 42, 46, 14);
 		panel_1.add(lblNewLabel_9);
+		
+		JButton BButton = new JButton("Transaksi");
+		BButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				no_resi = textField.getText();
+				java.time.LocalDate date = LocalDate.now();
+				String username = textField_1.getText();
+				
+				if(no_resi.equals("") || dateChooser.equals("") || username.equals("")) {
+					JOptionPane.showMessageDialog(null, "Error!");
+				}else {
+				try {
+					conn = DriverManager.getConnection(url, user, password);
+					stmt = conn.createStatement();
+					String sql = "INSERT INTO transaksi VALUES('"+no_resi+"','"+date+"','"+username+"')";
+					
+					JOptionPane.showMessageDialog(null, "Masukkan transaksi");
+					
+					int a = stmt.executeUpdate(sql);
+					if(a>0) {
+						textField.setEnabled(false);
+						dateChooser.setEnabled(false);
+						textField_1.setEnabled(false);
+					}
+					
+				}catch(Exception a) {
+					a.printStackTrace();
+				}
+			}
+			}
+		});
+		BButton.setBounds(201, 7, 89, 23);
+		panel_1.add(BButton);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setEnabled(false);
