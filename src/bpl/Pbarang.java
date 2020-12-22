@@ -214,6 +214,9 @@ public class Pbarang extends JFrame {
 				String stok = textField_2.getText();
 				String hbeli = textField_3.getText();
 				String hjual = textField_4.getText();
+				Integer stk=Integer.parseInt(stok);
+				Integer hb=Integer.parseInt(hbeli);
+				Integer hj=Integer.parseInt(hjual);
 				
 				if(no_sku.equals("") || nama.equals("") || stok.equals("") || hbeli.equals("") || hjual.equals("")) {
 					JOptionPane.showMessageDialog(null, "Error!");
@@ -228,6 +231,9 @@ public class Pbarang extends JFrame {
 						barang.add(hbeli);
 						barang.add(hjual);
 						
+					if(stk < 0 || hb < 0 || hj < 0) {
+						JOptionPane.showMessageDialog(null, "Data barang gagal ditambahkan");
+					}else {
 						stmt = conn.createStatement();
 						String sql = "INSERT INTO barang VALUES('"+barang.get(0)+"','"+barang.get(1)+"','"+barang.get(2)+"','"+barang.get(3)+"','"+barang.get(4)+"')";
 						
@@ -238,6 +244,7 @@ public class Pbarang extends JFrame {
 						if(a>0) {
 							showDataBarang();
 						}
+					}
 						
 					}catch(Exception a) {
 						a.printStackTrace();
@@ -256,6 +263,9 @@ public class Pbarang extends JFrame {
 				String stok = textField_2.getText();
 				String hbeli = textField_3.getText();
 				String hjual = textField_4.getText();
+				Integer stk=Integer.parseInt(stok);
+				Integer hb=Integer.parseInt(hbeli);
+				Integer hj=Integer.parseInt(hjual);
 				
 				if(nama.equals("") || stok.equals("") || hbeli.equals("") || hjual.equals("")) {
 					JOptionPane.showMessageDialog(null, "Masukkan kode barang yang ingin diedit!");
@@ -270,17 +280,21 @@ public class Pbarang extends JFrame {
 						barang.add(hbeli);
 						barang.add(hjual);
 
+					if(stk < 0 || hb < 0 || hj < 0) {
+						JOptionPane.showMessageDialog(null, "Data barang gagal ditambahkan");
+					}else {
 						stmt = conn.createStatement();
 						String sql = "UPDATE barang SET nama='"+barang.get(1)+"', stock='"+barang.get(2)+"', harga_beli='"+barang.get(3)+"', harga_jual='"+barang.get(4)+"' WHERE sku='"+barang.get(0)+"'";
 						
-						if(stmt.executeUpdate(sql) > 0){
+					if(stmt.executeUpdate(sql) > 0){
 		                	JOptionPane.showMessageDialog(null, "Barang yang diedit berhasil");
 		                	showDataBarang();
 		                	clear();
-						}else{
-		                    JOptionPane.showMessageDialog(null, "Barang yang diedit tidak ada");
-		                    showDataBarang();
-		                }
+					}else{
+		                   	 JOptionPane.showMessageDialog(null, "Barang yang diedit tidak ada");
+		                    	showDataBarang();
+		                		}
+					}
 						
 					}catch(Exception a) {
 						a.printStackTrace();
